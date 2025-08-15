@@ -12,6 +12,48 @@
     return ['+', '-', '*', '/'].includes(char);
   }
 
+  function appendToInput(value) {
+    if (resetNext) {
+      currentInput = isOperator(value) || value === ')' ? currentInput + value : value;
+      resetNext = false;
+    } else {
+      if (value === '.') {
+        const lastNumber = currentInput.split(/[\+\-\*\/\(\)]/).pop();
+        if (lastNumber.includes('.')) return;
+      }
+      if (currentInput === '0' && value !== '.') {
+        currentInput = value;
+      } else {
+        currentInput += value;
+      }
+    }
+    updateDisplay();
+  }
+
+  function calculate() {
+    try {
+      let result = Function(`return ${currentInput}`)();
+      currentInput = String(result);
+    } catch {
+      currentInput = 'Error';
+    }
+    resetNext = true;
+    updateDisplay();
+  }
+
+  function backspace() {
+    if (resetNext) {
+      currentInput = '0';
+      resetNext = false;
+    } else {
+      currentInput = currentInput.slice(0, -1);
+      if (currentInput === '' || currentInput === '-') {
+        currentInput = '0';
+      }
+    }
+    updateDisplay();
+  }
+
   buttons.forEach(button => {
     button.addEventListener('click', () => {
       const num = button.getAttribute('data-num');
@@ -19,7 +61,6 @@
       const paren = button.getAttribute('data-paren');
       const id = button.id;
 
-      // Clear
       if(id === 'clear') {
         currentInput = '0';
         resetNext = false;
@@ -27,80 +68,53 @@
         return;
       }
 
-      // Backspace
       if(id === 'backspace') {
-        if (resetNext) {
-          currentInput = '0';
-          resetNext = false;
-        } else {
-          currentInput = currentInput.slice(0, -1);
-          if (currentInput === '' || currentInput === '-') {
-            currentInput = '0';
-          }
-        }
-        updateDisplay();
+        backspace();
         return;
       }
 
-      // Equals
       if(id === 'equals') {
-        try {
-          let result = Function(`return ${currentInput}`)();
-          currentInput = String(result);
-        } catch {
-          currentInput = 'Error';
-        }
-        resetNext = true;
-        updateDisplay();
+        calculate();
         return;
       }
 
-      // Numbers and decimals
       if(num !== null) {
-        if(resetNext) {
-          currentInput = num === '.' ? '0.' : num;
-          resetNext = false;
-        } else {
-          const lastNumber = currentInput.split(/[\+\-\*\/\(\)]/).pop();
-
-          if (num === '.' && lastNumber.includes('.')) return;
-
-          if (currentInput === '0' && num !== '.') {
-            currentInput = num;
-          } else {
-            currentInput += num;
-          }
-        }
-        updateDisplay();
+        appendToInput(num);
         return;
       }
 
-      // Operators
       if(op !== null) {
-        if(resetNext) resetNext = false;
-
-        if(currentInput.length === 0) return;
-
-        if(isOperator(currentInput.slice(-1))) {
-          currentInput = currentInput.slice(0, -1) + op;
-        } else {
-          currentInput += op;
-        }
-        updateDisplay();
+        appendToInput(op);
         return;
       }
 
-      // Parentheses
       if(paren !== null) {
-        if (resetNext) {
-          currentInput = paren;
-          resetNext = false;
-        } else {
-          currentInput += paren;
-        }
-        updateDisplay();
+        appendToInput(paren);
         return;
       }
     });
+  });
+
+  // 🔑 Keyboard Support
+  document.addEventListener('keydown', (e) => {
+    const key = e.key;
+
+    if (!isNaN(key) || key === '.') {
+      appendToInput(key);
+    } else if (['+', '-', '*', '/'].includes(key)) {
+      appendToInput(key);
+    } else if (key === '(' || key === ')') {
+      appendToInput(key);
+    } else if (key === 'Enter' || key === '=') {
+      e.preventDefault();
+      calculate();
+    } else if (key === 'Backspace') {
+      e.preventDefault();
+      backspace();
+    } else if (key.toLowerCase() === 'c' || key === 'Escape') {
+      currentInput = '0';
+      resetNext = false;
+      updateDisplay();
+    }
   });
 })();
