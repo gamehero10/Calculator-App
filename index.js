@@ -16,6 +16,7 @@
     button.addEventListener('click', () => {
       const num = button.getAttribute('data-num');
       const op = button.getAttribute('data-op');
+      const paren = button.getAttribute('data-paren');
       const id = button.id;
 
       if(id === 'clear') {
@@ -39,12 +40,17 @@
 
       if(num !== null) {
         if(resetNext) {
-          currentInput = num;
+          currentInput = num === '.' ? '0.' : num;
           resetNext = false;
-        } else if(currentInput === '0') {
-          currentInput = num;
         } else {
-          currentInput += num;
+          const lastNumber = currentInput.split(/[\+\-\*\/\(\)]/).pop();
+          if (num === '.' && lastNumber.includes('.')) return;
+
+          if (currentInput === '0' && num !== '.') {
+            currentInput = num;
+          } else {
+            currentInput += num;
+          }
         }
         updateDisplay();
         return;
@@ -52,7 +58,7 @@
 
       if(op !== null) {
         if(resetNext) resetNext = false;
-        if(currentInput.length === 0) return;
+
         if(isOperator(currentInput.slice(-1))) {
           currentInput = currentInput.slice(0, -1) + op;
         } else {
@@ -61,6 +67,18 @@
         updateDisplay();
         return;
       }
+
+      if(paren !== null) {
+        if (resetNext) {
+          currentInput = paren;
+          resetNext = false;
+        } else {
+          currentInput += paren;
+        }
+        updateDisplay();
+        return;
+      }
     });
   });
 })();
+ 
