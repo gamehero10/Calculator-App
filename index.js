@@ -13,26 +13,40 @@
   }
 
   function appendToInput(value) {
-    if (resetNext) {
-      currentInput = isOperator(value) || value === ')' ? currentInput + value : value;
+    if (resetNext && !isOperator(value) && !value.match(/^[\)\d\.pi e]/)) {
+      currentInput = value;
       resetNext = false;
+      updateDisplay();
+      return;
+    }
+    if (value === '.') {
+      const lastNumber = currentInput.split(/[\+\-\*\/\(\)]/).pop();
+      if (lastNumber.includes('.')) return;
+    }
+    if (currentInput === '0' && value !== '.') {
+      currentInput = value;
     } else {
-      if (value === '.') {
-        const lastNumber = currentInput.split(/[\+\-\*\/\(\)]/).pop();
-        if (lastNumber.includes('.')) return;
-      }
-      if (currentInput === '0' && value !== '.') {
-        currentInput = value;
-      } else {
-        currentInput += value;
-      }
+      currentInput += value;
     }
     updateDisplay();
   }
 
-  function calculate() {
+  function wrapFunction(funcName) {
+    currentInput += `${funcName}(`;
+    updateDisplay();
+  }
+
+  function compute() {
     try {
-      let result = Function(`return ${currentInput}`)();
+      const expr = currentInput
+        .replace(/π/g, 'Math.PI')
+        .replace(/\be\b/g, 'Math.E')
+        .replace(/√\(/g, 'Math.sqrt(')
+        .replace(/log\(/g, 'Math.log10(')
+        .replace(/ln\(/g, 'Math.log(')
+        .replace(/exp\(/g, 'Math.exp(');
+
+      const result = Function(`return ${expr}`)();
       currentInput = String(result);
     } catch {
       currentInput = 'Error';
@@ -59,55 +73,42 @@
       const num = button.getAttribute('data-num');
       const op = button.getAttribute('data-op');
       const paren = button.getAttribute('data-paren');
+      const func = button.getAttribute('data-func');
+      const constant = button.getAttribute('data-const');
       const id = button.id;
 
-      if(id === 'clear') {
+      if (id === 'clear') {
         currentInput = '0';
         resetNext = false;
         updateDisplay();
-        return;
-      }
-
-      if(id === 'backspace') {
+      } else if (id === 'backspace') {
         backspace();
-        return;
-      }
-
-      if(id === 'equals') {
-        calculate();
-        return;
-      }
-
-      if(num !== null) {
+      } else if (id === 'equals') {
+        compute();
+      } else if (num !== null) {
         appendToInput(num);
-        return;
-      }
-
-      if(op !== null) {
+      } else if (op !== null) {
         appendToInput(op);
-        return;
-      }
-
-      if(paren !== null) {
+      } else if (paren !== null) {
         appendToInput(paren);
-        return;
+      } else if (func !== null) {
+        wrapFunction(func);
+      } else if (constant !== null) {
+        appendToInput(constant === 'pi' ? 'π' : 'e');
       }
     });
   });
 
-  // 🔑 Keyboard Support
   document.addEventListener('keydown', (e) => {
     const key = e.key;
 
     if (!isNaN(key) || key === '.') {
       appendToInput(key);
-    } else if (['+', '-', '*', '/'].includes(key)) {
-      appendToInput(key);
-    } else if (key === '(' || key === ')') {
+    } else if (['+', '-', '*', '/','(',')'].includes(key)) {
       appendToInput(key);
     } else if (key === 'Enter' || key === '=') {
       e.preventDefault();
-      calculate();
+      compute();
     } else if (key === 'Backspace') {
       e.preventDefault();
       backspace();

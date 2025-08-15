@@ -12,7 +12,7 @@ body {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  width: 280px;
+  width: 320px;
 }
 
 .display {
@@ -32,7 +32,7 @@ body {
 
 .buttons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 10px;
 }
 
@@ -47,7 +47,8 @@ button {
 }
 
 button.operator,
-button[data-paren] {
+button[data-paren],
+button[data-func] {
   background: #f57c00;
   color: white;
 }
@@ -55,6 +56,7 @@ button[data-paren] {
 button.equal {
   background: #388e3c;
   color: white;
+  grid-column: span 2;
 }
 
 button.clear {
@@ -67,12 +69,18 @@ button#backspace {
   color: white;
 }
 
+button[data-const] {
+  background: #5c6bc0;
+  color: white;
+}
+
 button:hover {
   background: #ccc;
 }
 
 button.operator:hover,
-button[data-paren]:hover {
+button[data-paren]:hover,
+button[data-func]:hover {
   background: #ef6c00;
 }
 
@@ -86,4 +94,8 @@ button.clear:hover {
 
 button#backspace:hover {
   background: #455a64;
+}
+
+button[data-const]:hover {
+  background: #3949ab;
 }
