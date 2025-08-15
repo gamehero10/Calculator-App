@@ -12,7 +12,7 @@ body {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  width: 260px;
+  width: 280px;
 }
 
 .display {
@@ -54,13 +54,16 @@ button[data-paren] {
 button.equal {
   background: #388e3c;
   color: white;
-  grid-column: span 2;
 }
 
 button.clear {
   background: #d32f2f;
   color: white;
-  grid-column: span 2;
+}
+
+button#backspace {
+  background: #607d8b;
+  color: white;
 }
 
 button:hover {
@@ -78,4 +81,8 @@ button.equal:hover {
 
 button.clear:hover {
   background: #c62828;
+}
+
+button#backspace:hover {
+  background: #455a64;
 }

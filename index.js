@@ -19,6 +19,7 @@
       const paren = button.getAttribute('data-paren');
       const id = button.id;
 
+      // Clear
       if(id === 'clear') {
         currentInput = '0';
         resetNext = false;
@@ -26,6 +27,22 @@
         return;
       }
 
+      // Backspace
+      if(id === 'backspace') {
+        if (resetNext) {
+          currentInput = '0';
+          resetNext = false;
+        } else {
+          currentInput = currentInput.slice(0, -1);
+          if (currentInput === '' || currentInput === '-') {
+            currentInput = '0';
+          }
+        }
+        updateDisplay();
+        return;
+      }
+
+      // Equals
       if(id === 'equals') {
         try {
           let result = Function(`return ${currentInput}`)();
@@ -38,6 +55,7 @@
         return;
       }
 
+      // Numbers and decimals
       if(num !== null) {
         if(resetNext) {
           currentInput = num === '.' ? '0.' : num;
@@ -57,6 +75,7 @@
         return;
       }
 
+      // Operators
       if(op !== null) {
         if(resetNext) resetNext = false;
 
@@ -71,6 +90,7 @@
         return;
       }
 
+      // Parentheses
       if(paren !== null) {
         if (resetNext) {
           currentInput = paren;
@@ -83,4 +103,4 @@
       }
     });
   });
-})(); 
+})();
