@@ -1,4 +1,4 @@
-body { 
+body {
   font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
@@ -45,7 +45,8 @@ button {
   transition: background 0.3s;
 }
 
-button.operator {
+button.operator,
+button[data-paren] {
   background: #f57c00;
   color: white;
 }
@@ -66,7 +67,8 @@ button:hover {
   background: #ccc;
 }
 
-button.operator:hover {
+button.operator:hover,
+button[data-paren]:hover {
   background: #ef6c00;
 }
 

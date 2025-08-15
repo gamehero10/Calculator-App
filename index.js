@@ -44,6 +44,7 @@
           resetNext = false;
         } else {
           const lastNumber = currentInput.split(/[\+\-\*\/\(\)]/).pop();
+
           if (num === '.' && lastNumber.includes('.')) return;
 
           if (currentInput === '0' && num !== '.') {
@@ -58,6 +59,8 @@
 
       if(op !== null) {
         if(resetNext) resetNext = false;
+
+        if(currentInput.length === 0) return;
 
         if(isOperator(currentInput.slice(-1))) {
           currentInput = currentInput.slice(0, -1) + op;
@@ -80,5 +83,4 @@
       }
     });
   });
-})();
- 
+})(); 
