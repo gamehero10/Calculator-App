@@ -23,10 +23,12 @@
       updateDisplay();
       return;
     }
+
     if (value === '.') {
       const lastNumber = currentInput.split(/[\+\-\*\/\(\)]/).pop();
       if (lastNumber.includes('.')) return;
     }
+
     if (currentInput === '0' && value !== '.') {
       currentInput = value;
     } else {
@@ -41,26 +43,41 @@
   }
 
   function validateExpression(expr) {
-    let stack = [];
-    for (let char of expr) {
-      if (char === '(') stack.push(char);
+    const len = expr.length;
+    let balance = 0;
+    let prevChar = '';
+    let dotCount = 0;
+
+    for (let i = 0; i < len; i++) {
+      const char = expr[i];
+
+      // Parentheses balance
+      if (char === '(') balance++;
       else if (char === ')') {
-        if (stack.length === 0) return false;
-        stack.pop();
+        if (balance === 0) return false;
+        balance--;
       }
+
+      // Invalid operator sequences
+      if (['+', '*', '/'].includes(char) && ['+', '*', '/'].includes(prevChar)) {
+        return false;
+      }
+
+      // Decimal validation
+      if (char === '.') {
+        dotCount++;
+        if (dotCount > 1) return false;
+      } else if (!/\d/.test(char)) {
+        dotCount = 0;
+      }
+
+      prevChar = char;
     }
-    if (stack.length !== 0) return false;
 
-    if (/[\+\*\/]{2,}/.test(expr)) return false;
-    if (/[\+\-\*\/]$/.test(expr)) return false;
-    if (/^[\*\/]/.test(expr)) return false;
+    // Expression must not start or end with * or /
+    if (/^[*/]/.test(expr) || /[+\-*/]$/.test(expr)) return false;
 
-    const tokens = expr.split(/[\+\-\*\/\(\)]/);
-    for (let token of tokens) {
-      if ((token.match(/\./g) || []).length > 1) return false;
-    }
-
-    return true;
+    return balance === 0;
   }
 
   function compute() {
@@ -86,7 +103,7 @@
       const result = Function(`return ${expr}`)();
       const finalResult = String(result);
 
-      // ✅ Add to history
+      // Save to history
       history.push({ expr: currentInput, result: finalResult });
       renderHistory();
 
@@ -181,4 +198,4 @@
       updateDisplay();
     }
   });
-})(); 
+})();
