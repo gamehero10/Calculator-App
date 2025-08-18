@@ -1,4 +1,4 @@
-(function(){
+(function () {
   const display = document.getElementById('display');
   const buttons = document.querySelectorAll('button');
   let currentInput = '0';
@@ -13,7 +13,7 @@
   }
 
   function appendToInput(value) {
-    if (resetNext && !isOperator(value) && !value.match(/^[\)\d\.pi e]/)) {
+    if (resetNext && !isOperator(value) && !value.match(/^[\)\d\.πe]/)) {
       currentInput = value;
       resetNext = false;
       updateDisplay();
@@ -36,6 +36,32 @@
     updateDisplay();
   }
 
+  function validateExpression(expr) {
+    // 1. Check for balanced parentheses
+    let stack = [];
+    for (let char of expr) {
+      if (char === '(') stack.push(char);
+      else if (char === ')') {
+        if (stack.length === 0) return false;
+        stack.pop();
+      }
+    }
+    if (stack.length !== 0) return false;
+
+    // 2. Disallow multiple operators in a row (except unary minus)
+    if (/[\+\*\/]{2,}/.test(expr)) return false;
+    if (/[\+\-\*\/]$/.test(expr)) return false;
+    if (/^[\*\/]/.test(expr)) return false;
+
+    // 3. Prevent multiple dots in numbers
+    const tokens = expr.split(/[\+\-\*\/\(\)]/);
+    for (let token of tokens) {
+      if ((token.match(/\./g) || []).length > 1) return false;
+    }
+
+    return true;
+  }
+
   function compute() {
     try {
       const expr = currentInput
@@ -44,7 +70,17 @@
         .replace(/√\(/g, 'Math.sqrt(')
         .replace(/log\(/g, 'Math.log10(')
         .replace(/ln\(/g, 'Math.log(')
-        .replace(/exp\(/g, 'Math.exp(');
+        .replace(/exp\(/g, 'Math.exp(')
+        .replace(/sin\(/g, 'Math.sin(')
+        .replace(/cos\(/g, 'Math.cos(')
+        .replace(/tan\(/g, 'Math.tan(');
+
+      if (!validateExpression(expr)) {
+        currentInput = 'Error';
+        resetNext = true;
+        updateDisplay();
+        return;
+      }
 
       const result = Function(`return ${expr}`)();
       currentInput = String(result);
@@ -104,7 +140,7 @@
 
     if (!isNaN(key) || key === '.') {
       appendToInput(key);
-    } else if (['+', '-', '*', '/','(',')'].includes(key)) {
+    } else if (['+', '-', '*', '/', '(', ')'].includes(key)) {
       appendToInput(key);
     } else if (key === 'Enter' || key === '=') {
       e.preventDefault();
