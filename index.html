@@ -8,10 +8,20 @@
 </head>
 <body>
   <div class="calculator">
+    <div class="lang-select">
+      <label for="language">🌐 Language:</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+      </select>
+    </div>
+
     <div id="display" class="display">0</div>
+
     <div class="buttons">
-      <button class="clear" id="clear">AC</button>
-      <button id="backspace">⌫</button>
+      <button class="clear" id="clear" data-i18n="clear">AC</button>
+      <button id="backspace" data-i18n="backspace">⌫</button>
       <button data-paren="(">(</button>
       <button data-paren=")">)</button>
 
@@ -32,7 +42,7 @@
 
       <button data-num="0">0</button>
       <button data-num=".">.</button>
-      <button class="equal" id="equals">=</button>
+      <button class="equal" id="equals" data-i18n="equals">=</button>
       <button class="operator" data-op="+">+</button>
 
       <button data-func="sin">sin</button>
@@ -47,8 +57,8 @@
     </div>
 
     <div class="history-header">
-      <h3>History</h3>
-      <button id="clear-history">Clear History</button>
+      <h3 data-i18n="historyTitle">History</h3>
+      <button id="clear-history" data-i18n="clearHistory">Clear History</button>
     </div>
     <div id="history" class="history"></div>
   </div>

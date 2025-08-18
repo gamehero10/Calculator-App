@@ -3,10 +3,52 @@
   const buttons = document.querySelectorAll('button');
   const historyContainer = document.getElementById('history');
   const clearHistoryBtn = document.getElementById('clear-history');
+  const langSelect = document.getElementById('language');
 
+  const translations = {
+    en: {
+      clear: "AC",
+      backspace: "⌫",
+      equals: "=",
+      historyTitle: "History",
+      clearHistory: "Clear History",
+      errorSyntax: "Invalid syntax",
+      errorMath: "Math error"
+    },
+    es: {
+      clear: "AC",
+      backspace: "⌫",
+      equals: "=",
+      historyTitle: "Historial",
+      clearHistory: "Borrar Historial",
+      errorSyntax: "Sintaxis inválida",
+      errorMath: "Error matemático"
+    },
+    fr: {
+      clear: "AC",
+      backspace: "⌫",
+      equals: "=",
+      historyTitle: "Historique",
+      clearHistory: "Effacer l'historique",
+      errorSyntax: "Syntaxe invalide",
+      errorMath: "Erreur mathématique"
+    }
+  };
+
+  let currentLang = 'en';
   let currentInput = '0';
   let resetNext = false;
   let history = [];
+
+  function updateLocalizedText() {
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (translations[currentLang][key]) {
+        el.textContent = translations[currentLang][key];
+      }
+    });
+  }
 
   function updateDisplay() {
     display.textContent = currentInput;
@@ -44,71 +86,55 @@
   }
 
   function validateExpression(expr) {
-    const len = expr.length;
-    let balance = 0;
-    let prevChar = '';
-    let dotCount = 0;
+    // Basic checks: parentheses balanced & only allowed chars
+    const allowedChars = /^[0-9+\-*/().πe\sA-Za-z]*$/;
+    if (!allowedChars.test(expr)) return false;
 
-    for (let i = 0; i < len; i++) {
-      const char = expr[i];
-
-      if (char === '(') balance++;
+    // Check balanced parentheses
+    let stack = [];
+    for (let char of expr) {
+      if (char === '(') stack.push(char);
       else if (char === ')') {
-        if (balance === 0) return false;
-        balance--;
+        if (stack.length === 0) return false;
+        stack.pop();
       }
-
-      if (['+', '*', '/'].includes(char) && ['+', '*', '/'].includes(prevChar)) {
-        return false;
-      }
-
-      if (char === '.') {
-        dotCount++;
-        if (dotCount > 1) return false;
-      } else if (!/\d/.test(char)) {
-        dotCount = 0;
-      }
-
-      prevChar = char;
     }
+    if (stack.length !== 0) return false;
 
-    if (/^[*/]/.test(expr) || /[+\-*/]$/.test(expr)) return false;
+    // Could add more validation here if needed
 
-    return balance === 0;
+    return true;
   }
 
   function compute() {
     try {
-      const expr = currentInput
+      let expr = currentInput
         .replace(/π/g, 'Math.PI')
         .replace(/\be\b/g, 'Math.E')
         .replace(/√\(/g, 'Math.sqrt(')
         .replace(/log\(/g, 'Math.log10(')
         .replace(/ln\(/g, 'Math.log(')
-        .replace(/exp\(/g, 'Math.exp(')
-        .replace(/sin\(/g, 'Math.sin(')
-        .replace(/cos\(/g, 'Math.cos(')
-        .replace(/tan\(/g, 'Math.tan(');
+        .replace(/exp\(/g, 'Math.exp(');
 
       if (!validateExpression(expr)) {
-        throw new Error('Invalid syntax');
+        throw new Error(translations[currentLang].errorSyntax);
       }
 
-      const result = Function(`"use strict"; return (${expr})`)();
+      const result = Function(`return ${expr}`)();
 
       if (!isFinite(result)) {
-        throw new Error('Math error');
+        throw new Error(translations[currentLang].errorMath);
       }
 
-      const finalResult = String(result);
-      history.push({ expr: currentInput, result: finalResult });
+      // Save to history
+      history.unshift({ expression: currentInput, result: String(result) });
+      if (history.length > 20) history.pop(); // limit history length
       renderHistory();
 
-      currentInput = finalResult;
+      currentInput = String(result);
     } catch (err) {
-      currentInput = `Error: ${err.message}`;
+      currentInput = 'Error: ' + (err.message || 'Unknown error');
     }
-
     resetNext = true;
     updateDisplay();
   }
@@ -128,10 +154,11 @@
 
   function renderHistory() {
     historyContainer.innerHTML = '';
-    history.slice().reverse().forEach(item => {
+    history.forEach((item, index) => {
       const div = document.createElement('div');
-      div.classList.add('history-item');
-      div.textContent = `${item.expr} = ${item.result}`;
+      div.className = 'history-item';
+      div.textContent = `${item.expression} = ${item.result}`;
+      div.title = "Click to reuse";
       div.addEventListener('click', () => {
         currentInput = item.result;
         resetNext = true;
@@ -140,11 +167,6 @@
       historyContainer.appendChild(div);
     });
   }
-
-  clearHistoryBtn.addEventListener('click', () => {
-    history = [];
-    renderHistory();
-  });
 
   buttons.forEach(button => {
     button.addEventListener('click', () => {
@@ -163,6 +185,9 @@
         backspace();
       } else if (id === 'equals') {
         compute();
+      } else if (id === 'clear-history') {
+        history = [];
+        renderHistory();
       } else if (num !== null) {
         appendToInput(num);
       } else if (op !== null) {
@@ -196,4 +221,20 @@
       updateDisplay();
     }
   });
+
+  langSelect.addEventListener('change', (e) => {
+    currentLang = e.target.value;
+    updateLocalizedText();
+  });
+
+  // Auto detect browser language (optional)
+  const browserLang = navigator.language.slice(0, 2);
+  if (translations[browserLang]) {
+    currentLang = browserLang;
+    langSelect.value = browserLang;
+  }
+
+  updateLocalizedText();
+  updateDisplay();
+  renderHistory();
 })(); 
