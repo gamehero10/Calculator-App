@@ -10,7 +10,7 @@
   <div class="calculator">
     <div id="display" class="display">0</div>
     <div class="buttons">
-      <button class="clear" id="clear">C</button>
+      <button class="clear" id="clear">AC</button>
       <button id="backspace">⌫</button>
       <button data-paren="(">(</button>
       <button data-paren=")">)</button>
@@ -45,6 +45,13 @@
       <button data-const="pi">π</button>
       <button data-const="e">e</button>
     </div>
+
+    <!-- History Panel -->
+    <div class="history-header">
+      <h3>History</h3>
+      <button id="clear-history">Clear History</button>
+    </div>
+    <div id="history" class="history"></div>
   </div>
 
   <script src="index.js"></script>

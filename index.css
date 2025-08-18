@@ -99,3 +99,54 @@ button#backspace:hover {
 button[data-const]:hover {
   background: #3949ab;
 }
+
+/* History styles */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.history-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+#clear-history {
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#clear-history:hover {
+  background-color: #b71c1c;
+}
+
+.history {
+  margin-top: 10px;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.history-item {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-item:hover {
+  background: #e0e0e0;
+}

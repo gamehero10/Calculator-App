@@ -1,8 +1,12 @@
 (function () {
   const display = document.getElementById('display');
   const buttons = document.querySelectorAll('button');
+  const historyContainer = document.getElementById('history');
+  const clearHistoryBtn = document.getElementById('clear-history');
+
   let currentInput = '0';
   let resetNext = false;
+  let history = [];
 
   function updateDisplay() {
     display.textContent = currentInput;
@@ -37,7 +41,6 @@
   }
 
   function validateExpression(expr) {
-    // 1. Check for balanced parentheses
     let stack = [];
     for (let char of expr) {
       if (char === '(') stack.push(char);
@@ -48,12 +51,10 @@
     }
     if (stack.length !== 0) return false;
 
-    // 2. Disallow multiple operators in a row (except unary minus)
     if (/[\+\*\/]{2,}/.test(expr)) return false;
     if (/[\+\-\*\/]$/.test(expr)) return false;
     if (/^[\*\/]/.test(expr)) return false;
 
-    // 3. Prevent multiple dots in numbers
     const tokens = expr.split(/[\+\-\*\/\(\)]/);
     for (let token of tokens) {
       if ((token.match(/\./g) || []).length > 1) return false;
@@ -83,7 +84,13 @@
       }
 
       const result = Function(`return ${expr}`)();
-      currentInput = String(result);
+      const finalResult = String(result);
+
+      // ✅ Add to history
+      history.push({ expr: currentInput, result: finalResult });
+      renderHistory();
+
+      currentInput = finalResult;
     } catch {
       currentInput = 'Error';
     }
@@ -103,6 +110,26 @@
     }
     updateDisplay();
   }
+
+  function renderHistory() {
+    historyContainer.innerHTML = '';
+    history.slice().reverse().forEach(item => {
+      const div = document.createElement('div');
+      div.classList.add('history-item');
+      div.textContent = `${item.expr} = ${item.result}`;
+      div.addEventListener('click', () => {
+        currentInput = item.result;
+        resetNext = true;
+        updateDisplay();
+      });
+      historyContainer.appendChild(div);
+    });
+  }
+
+  clearHistoryBtn.addEventListener('click', () => {
+    history = [];
+    renderHistory();
+  });
 
   buttons.forEach(button => {
     button.addEventListener('click', () => {
@@ -154,4 +181,4 @@
       updateDisplay();
     }
   });
-})();
+})(); 
