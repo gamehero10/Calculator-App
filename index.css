@@ -30,6 +30,10 @@ body {
   overflow-x: auto;
 }
 
+.display.error {
+  color: #f44336;
+}
+
 .buttons {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -149,4 +153,4 @@ button[data-const]:hover {
 
 .history-item:hover {
   background: #e0e0e0;
-} 
+}

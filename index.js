@@ -10,6 +10,7 @@
 
   function updateDisplay() {
     display.textContent = currentInput;
+    display.classList.toggle('error', currentInput.startsWith('Error'));
   }
 
   function isOperator(char) {
@@ -51,19 +52,16 @@
     for (let i = 0; i < len; i++) {
       const char = expr[i];
 
-      // Parentheses balance
       if (char === '(') balance++;
       else if (char === ')') {
         if (balance === 0) return false;
         balance--;
       }
 
-      // Invalid operator sequences
       if (['+', '*', '/'].includes(char) && ['+', '*', '/'].includes(prevChar)) {
         return false;
       }
 
-      // Decimal validation
       if (char === '.') {
         dotCount++;
         if (dotCount > 1) return false;
@@ -74,7 +72,6 @@
       prevChar = char;
     }
 
-    // Expression must not start or end with * or /
     if (/^[*/]/.test(expr) || /[+\-*/]$/.test(expr)) return false;
 
     return balance === 0;
@@ -94,23 +91,24 @@
         .replace(/tan\(/g, 'Math.tan(');
 
       if (!validateExpression(expr)) {
-        currentInput = 'Error';
-        resetNext = true;
-        updateDisplay();
-        return;
+        throw new Error('Invalid syntax');
       }
 
-      const result = Function(`return ${expr}`)();
-      const finalResult = String(result);
+      const result = Function(`"use strict"; return (${expr})`)();
 
-      // Save to history
+      if (!isFinite(result)) {
+        throw new Error('Math error');
+      }
+
+      const finalResult = String(result);
       history.push({ expr: currentInput, result: finalResult });
       renderHistory();
 
       currentInput = finalResult;
-    } catch {
-      currentInput = 'Error';
+    } catch (err) {
+      currentInput = `Error: ${err.message}`;
     }
+
     resetNext = true;
     updateDisplay();
   }
@@ -198,4 +196,4 @@
       updateDisplay();
     }
   });
-})();
+})(); 
