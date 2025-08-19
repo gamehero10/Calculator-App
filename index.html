@@ -8,17 +8,7 @@
 </head>
 <body>
   <div class="calculator">
-    <div class="lang-select">
-      <label for="language">🌐 Language:</label>
-      <select id="language">
-        <option value="en">English</option>
-        <option value="es">Español</option>
-        <option value="fr">Français</option>
-      </select>
-    </div>
-
     <div id="display" class="display">0</div>
-
     <div class="buttons">
       <button class="clear" id="clear" data-i18n="clear">AC</button>
       <button id="backspace" data-i18n="backspace">⌫</button>
@@ -56,11 +46,20 @@
       <button data-const="e">e</button>
     </div>
 
-    <div class="history-header">
+    <div class="history-section">
       <h3 data-i18n="historyTitle">History</h3>
+      <div id="history" class="history"></div>
       <button id="clear-history" data-i18n="clearHistory">Clear History</button>
     </div>
-    <div id="history" class="history"></div>
+
+    <div class="language-selector">
+      <label for="language">Language:</label>
+      <select id="language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+      </select>
+    </div>
   </div>
 
   <script src="index.js"></script>

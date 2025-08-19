@@ -13,7 +13,8 @@
       historyTitle: "History",
       clearHistory: "Clear History",
       errorSyntax: "Invalid syntax",
-      errorMath: "Math error"
+      errorMath: "Math error",
+      errorAPI: "API error"
     },
     es: {
       clear: "AC",
@@ -22,7 +23,8 @@
       historyTitle: "Historial",
       clearHistory: "Borrar Historial",
       errorSyntax: "Sintaxis inválida",
-      errorMath: "Error matemático"
+      errorMath: "Error matemático",
+      errorAPI: "Error de API"
     },
     fr: {
       clear: "AC",
@@ -31,7 +33,8 @@
       historyTitle: "Historique",
       clearHistory: "Effacer l'historique",
       errorSyntax: "Syntaxe invalide",
-      errorMath: "Erreur mathématique"
+      errorMath: "Erreur mathématique",
+      errorAPI: "Erreur API"
     }
   };
 
@@ -86,11 +89,9 @@
   }
 
   function validateExpression(expr) {
-    // Basic checks: parentheses balanced & only allowed chars
     const allowedChars = /^[0-9+\-*/().πe\sA-Za-z]*$/;
     if (!allowedChars.test(expr)) return false;
 
-    // Check balanced parentheses
     let stack = [];
     for (let char of expr) {
       if (char === '(') stack.push(char);
@@ -99,14 +100,28 @@
         stack.pop();
       }
     }
-    if (stack.length !== 0) return false;
-
-    // Could add more validation here if needed
-
-    return true;
+    return stack.length === 0;
   }
 
-  function compute() {
+  // Call a 3rd-party math API (Math.js API example)
+  async function evaluateWithAPI(expr) {
+    const apiUrl = 'https://api.mathjs.org/v4/';
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expr }),
+      });
+      if (!response.ok) throw new Error('API response not OK');
+      const data = await response.json();
+      return data.result;
+    } catch {
+      throw new Error(translations[currentLang].errorAPI);
+    }
+  }
+
+  async function compute() {
     try {
       let expr = currentInput
         .replace(/π/g, 'Math.PI')
@@ -120,15 +135,18 @@
         throw new Error(translations[currentLang].errorSyntax);
       }
 
-      const result = Function(`return ${expr}`)();
-
-      if (!isFinite(result)) {
-        throw new Error(translations[currentLang].errorMath);
+      // Try local eval first
+      let result;
+      try {
+        result = Function(`return ${expr}`)();
+        if (!isFinite(result)) throw new Error(translations[currentLang].errorMath);
+      } catch {
+        // Fallback to API
+        result = await evaluateWithAPI(expr);
       }
 
-      // Save to history
       history.unshift({ expression: currentInput, result: String(result) });
-      if (history.length > 20) history.pop(); // limit history length
+      if (history.length > 20) history.pop();
       renderHistory();
 
       currentInput = String(result);
@@ -154,7 +172,7 @@
 
   function renderHistory() {
     historyContainer.innerHTML = '';
-    history.forEach((item, index) => {
+    history.forEach((item) => {
       const div = document.createElement('div');
       div.className = 'history-item';
       div.textContent = `${item.expression} = ${item.result}`;
@@ -227,7 +245,7 @@
     updateLocalizedText();
   });
 
-  // Auto detect browser language (optional)
+  // Auto select browser language if supported
   const browserLang = navigator.language.slice(0, 2);
   if (translations[browserLang]) {
     currentLang = browserLang;
